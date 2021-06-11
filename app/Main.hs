@@ -79,30 +79,31 @@ lexline (row, content) = lexline' row 0 content
   where
     lexline' :: Int -> Int -> String -> [(Token, Int, Int)]
     lexline' r c cont = 
-      if c >= length cont || all isSpace (drop c cont) then [] else (tk, r, c) : lexline' r nextCol cont
+      if c >= length cont || all isSpace (drop c cont) then [] else (tk, r, startCol) : lexline' r nextCol cont
       where
-        (tk, nextCol) = case matchLongestToken c cont of
-          Just (tkk, nc) -> (tkk, nc)
+        (tk, startCol, nextCol) = case matchLongestToken c cont of
+          -- We want to si + 1 because we were 0-index
+          Just (tkk, si, nc) -> (tkk, si + 1, nc)
           Nothing -> error "Fail to tokenize"
 
 -- Matches the longest token starting from column
--- Returns Maybe due to possible failure to match
-matchLongestToken :: Int -> String -> Maybe (Token, Int)
+-- Returns Maybe (Token, StartIdx, NextCol) due to possible failure to match
+matchLongestToken :: Int -> String -> Maybe (Token, Int, Int)
 matchLongestToken startIdx content
-  | "bool" `isPrefixOf` stripped = Just (TkBool, idxAfterStripped + 4)
-  | "break" `isPrefixOf` stripped = Just (TkBreak, idxAfterStripped + 5)
-  | "import" `isPrefixOf` stripped = Just (TkImport, idxAfterStripped + 6)
-  | "continue" `isPrefixOf` stripped = Just (TkContinue, idxAfterStripped + 8)
-  | "else" `isPrefixOf` stripped = Just (TkElse, idxAfterStripped + 4)
-  | "false" `isPrefixOf` stripped = Just (TkFalse, idxAfterStripped + 5)
-  | "for" `isPrefixOf` stripped = Just (TkFor, idxAfterStripped + 3)
-  | "while" `isPrefixOf` stripped = Just (TkWhile, idxAfterStripped + 5)
-  | "if" `isPrefixOf` stripped =  Just (TkIf, idxAfterStripped + 2)
-  | "int" `isPrefixOf` stripped = Just (TkInt, idxAfterStripped + 3)
-  | "return" `isPrefixOf` stripped = Just (TkReturn, idxAfterStripped + 6)
-  | "len" `isPrefixOf` stripped = Just (TkLen, idxAfterStripped + 3)
-  | "true" `isPrefixOf` stripped = Just (TkTrue, idxAfterStripped + 4)
-  | "void" `isPrefixOf` stripped = Just (TkVoid, idxAfterStripped + 4)
+  | "bool" `isPrefixOf` stripped = Just (TkBool, idxAfterStripped, idxAfterStripped + 4)
+  | "break" `isPrefixOf` stripped = Just (TkBreak, idxAfterStripped, idxAfterStripped + 5)
+  | "import" `isPrefixOf` stripped = Just (TkImport, idxAfterStripped, idxAfterStripped + 6)
+  | "continue" `isPrefixOf` stripped = Just (TkContinue, idxAfterStripped, idxAfterStripped + 8)
+  | "else" `isPrefixOf` stripped = Just (TkElse, idxAfterStripped, idxAfterStripped + 4)
+  | "false" `isPrefixOf` stripped = Just (TkFalse, idxAfterStripped, idxAfterStripped + 5)
+  | "for" `isPrefixOf` stripped = Just (TkFor, idxAfterStripped, idxAfterStripped + 3)
+  | "while" `isPrefixOf` stripped = Just (TkWhile, idxAfterStripped, idxAfterStripped + 5)
+  | "if" `isPrefixOf` stripped =  Just (TkIf, idxAfterStripped, idxAfterStripped + 2)
+  | "int" `isPrefixOf` stripped = Just (TkInt, idxAfterStripped, idxAfterStripped + 3)
+  | "return" `isPrefixOf` stripped = Just (TkReturn, idxAfterStripped, idxAfterStripped + 6)
+  | "len" `isPrefixOf` stripped = Just (TkLen, idxAfterStripped, idxAfterStripped + 3)
+  | "true" `isPrefixOf` stripped = Just (TkTrue, idxAfterStripped, idxAfterStripped + 4)
+  | "void" `isPrefixOf` stripped = Just (TkVoid, idxAfterStripped, idxAfterStripped + 4)
   | otherwise = Nothing -- Possibly Either as one is probably an error, and one could be something where it does not happen
   where
     (stripped, amountStripped) = lstrip (drop startIdx content)
