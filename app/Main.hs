@@ -90,21 +90,23 @@ lexline (row, content) = lexline' row 0 content
 -- Returns Maybe (Token, StartIdx, NextCol) due to possible failure to match
 matchLongestToken :: Int -> String -> Maybe (Token, Int, Int)
 matchLongestToken startIdx content
-  | "bool" `isPrefixOf` stripped = Just (TkBool, idxAfterStripped, idxAfterStripped + 4)
-  | "break" `isPrefixOf` stripped = Just (TkBreak, idxAfterStripped, idxAfterStripped + 5)
-  | "import" `isPrefixOf` stripped = Just (TkImport, idxAfterStripped, idxAfterStripped + 6)
-  | "continue" `isPrefixOf` stripped = Just (TkContinue, idxAfterStripped, idxAfterStripped + 8)
-  | "else" `isPrefixOf` stripped = Just (TkElse, idxAfterStripped, idxAfterStripped + 4)
-  | "false" `isPrefixOf` stripped = Just (TkFalse, idxAfterStripped, idxAfterStripped + 5)
-  | "for" `isPrefixOf` stripped = Just (TkFor, idxAfterStripped, idxAfterStripped + 3)
-  | "while" `isPrefixOf` stripped = Just (TkWhile, idxAfterStripped, idxAfterStripped + 5)
-  | "if" `isPrefixOf` stripped =  Just (TkIf, idxAfterStripped, idxAfterStripped + 2)
-  | "int" `isPrefixOf` stripped = Just (TkInt, idxAfterStripped, idxAfterStripped + 3)
-  | "return" `isPrefixOf` stripped = Just (TkReturn, idxAfterStripped, idxAfterStripped + 6)
-  | "len" `isPrefixOf` stripped = Just (TkLen, idxAfterStripped, idxAfterStripped + 3)
-  | "true" `isPrefixOf` stripped = Just (TkTrue, idxAfterStripped, idxAfterStripped + 4)
-  | "void" `isPrefixOf` stripped = Just (TkVoid, idxAfterStripped, idxAfterStripped + 4)
+  | "bool" `isPrefixOf` stripped = create TkBool "bool"
+  | "break" `isPrefixOf` stripped = create TkBreak "break"
+  | "import" `isPrefixOf` stripped = create TkImport "import"
+  | "continue" `isPrefixOf` stripped = create TkContinue "continue"
+  | "else" `isPrefixOf` stripped = create TkElse "else"
+  | "false" `isPrefixOf` stripped = create TkFalse "false"
+  | "for" `isPrefixOf` stripped = create TkFor "for"
+  | "while" `isPrefixOf` stripped = create TkWhile "while"
+  | "if" `isPrefixOf` stripped =  create TkIf "if"
+  | "int" `isPrefixOf` stripped = create TkInt "int"
+  | "return" `isPrefixOf` stripped = create TkReturn "return"
+  | "len" `isPrefixOf` stripped = create TkLen "len"
+  | "true" `isPrefixOf` stripped = create TkTrue "true"
+  | "void" `isPrefixOf` stripped = create TkVoid "void"
   | otherwise = Nothing -- Possibly Either as one is probably an error, and one could be something where it does not happen
   where
     (stripped, amountStripped) = lstrip (drop startIdx content)
     idxAfterStripped = startIdx + amountStripped
+    create :: Token -> String -> Maybe (Token, Int, Int)
+    create token str = Just (token, idxAfterStripped, idxAfterStripped + length str)
