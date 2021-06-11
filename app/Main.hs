@@ -28,11 +28,11 @@ data Token = TkIf               -- Keywords begin
             | TkIdentifier String
             | TkSemicolon       -- Special symbols
             | TkComma
-            | TkOpenBracket     -- Bracket: [], Braces: {}, Paren: ()
-            | TkOpenBraces
+            | TkOpenBracket     -- Bracket: [], Brace: {}, Paren: ()
+            | TkOpenBrace
             | TkOpenParen
             | TkCloseBracket
-            | TkCloseBraces
+            | TkCloseBrace
             | TkCloseParen
             | TkPlus
             | TkMinus
@@ -49,6 +49,8 @@ data Token = TkIf               -- Keywords begin
             | TkNotEqual
             | TkPlusEqual
             | TkMinusEqual
+            | TkPlusPlus
+            | TkMinusMinus
             | TkAnd
             | TkOr
             deriving (Eq, Show)
@@ -104,6 +106,33 @@ matchLongestToken startIdx content
   | "len" `isPrefixOf` stripped = create TkLen "len"
   | "true" `isPrefixOf` stripped = create TkTrue "true"
   | "void" `isPrefixOf` stripped = create TkVoid "void"
+  | "+=" `isPrefixOf` stripped = create TkPlusEqual "+="
+  | "-=" `isPrefixOf` stripped = create TkMinusEqual "-="
+  | "++" `isPrefixOf` stripped = create TkPlusPlus "++"
+  | "--" `isPrefixOf` stripped = create TkMinusMinus "--"
+  | "<=" `isPrefixOf` stripped = create TkLessEqual "<="
+  | ">=" `isPrefixOf` stripped = create TkGreaterEqual ">="
+  | "==" `isPrefixOf` stripped = create TkEqualEqual "=="
+  | "!=" `isPrefixOf` stripped = create TkNotEqual "!="
+  | "&&" `isPrefixOf` stripped = create TkAnd "&&"
+  | "||" `isPrefixOf` stripped = create TkOr "||"
+  | "=" `isPrefixOf` stripped = create TkEqual "="
+  | "<" `isPrefixOf` stripped = create TkLess "<"
+  | ">" `isPrefixOf` stripped = create TkGreater ">"
+  | ";" `isPrefixOf` stripped = create TkSemicolon ";"
+  | "," `isPrefixOf` stripped = create TkComma ","
+  | "[" `isPrefixOf` stripped = create TkOpenBracket "["
+  | "]" `isPrefixOf` stripped = create TkCloseBracket "]"
+  | "{" `isPrefixOf` stripped = create TkOpenBrace "{"
+  | "}" `isPrefixOf` stripped = create TkCloseBrace "}"
+  | "(" `isPrefixOf` stripped = create TkOpenParen "("
+  | ")" `isPrefixOf` stripped = create TkCloseParen ")"
+  | "+" `isPrefixOf` stripped = create TkPlus "+"
+  | "-" `isPrefixOf` stripped = create TkMinus "-"
+  | "!" `isPrefixOf` stripped = create TkExclamation "!"
+  | "*" `isPrefixOf` stripped = create TkAsterisk "*"
+  | "/" `isPrefixOf` stripped = create TkFSlash "/"
+  | "%" `isPrefixOf` stripped = create TkPercent "%"
   | otherwise = Nothing -- Possibly Either as one is probably an error, and one could be something where it does not happen
   where
     (stripped, amountStripped) = lstrip (drop startIdx content)
